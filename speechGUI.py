@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 import speech_recognition as sr
 import re
+import os
+import platform
+import subprocess
 
 class TrieNode:
     def __init__(self):
@@ -101,6 +104,10 @@ class VoiceApp:
         self.input_text = tk.Entry(window, width=50)
         self.input_text.pack(anchor=tk.CENTER)
 
+        # word_data.txt 파일 열기 버튼
+        self.open_file_btn = tk.Button(window, text="점수 확인", command=self.open_word_data_file)
+        self.open_file_btn.pack()
+
         # 음성 인식 버튼
         self.recognize_btn = tk.Button(window, text="음성인식 시작", command=self.recognize_speech)
         self.recognize_btn.pack()
@@ -117,6 +124,18 @@ class VoiceApp:
 
         self.trie = Trie()
         self.trie.load_from_file("word_data.txt")
+   
+    def open_word_data_file(self):
+        # 파일 경로
+        filepath = "word_data.txt"
+
+        # 운영 체제별로 파일 열기
+        if platform.system() == 'Windows':
+            os.startfile(filepath)
+        elif platform.system() == 'Darwin':  # macOS
+            subprocess.call(('open', filepath))
+        else:  # Linux 및 기타 OS
+            subprocess.call(('xdg-open', filepath))
 
     def recognize_speech(self):
         self.status_label.config(text="듣고 있음...")
