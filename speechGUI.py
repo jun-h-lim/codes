@@ -54,6 +54,16 @@ class Trie:
         except FileNotFoundError:
             print(f"{file_path} 파일이 존재하지 않습니다. 새로운 파일을 생성합니다.")
 
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return None
+            node = node.children[char]
+        if node is not None and node.is_end_of_word:
+            return node
+        return None
+    
     def insert_existing(self, word, count, score):
         node = self.root
         for char in word:
@@ -104,6 +114,16 @@ class VoiceApp:
         self.input_text = tk.Entry(window, width=50)
         self.input_text.pack(anchor=tk.CENTER)
 
+        # 검색 관련 위젯
+        self.search_label = tk.Label(window, text="단어 검색:")
+        self.search_label.pack()
+        self.search_text = tk.Entry(window)
+        self.search_text.pack()
+        self.search_btn = tk.Button(window, text="검색", command=self.search_word)
+        self.search_btn.pack()
+        self.search_result_label = tk.Label(window, text="", fg="yellow")
+        self.search_result_label.pack()
+
         # word_data.txt 파일 열기 버튼
         self.open_file_btn = tk.Button(window, text="점수 확인", command=self.open_word_data_file)
         self.open_file_btn.pack()
@@ -120,11 +140,19 @@ class VoiceApp:
         self.result_label = tk.Label(window, text="결과")
         self.result_label.pack()
         self.result_text = tk.Text(window, width=50)
-        self.result_text.pack()
+        self.result_text.pack() 
 
         self.trie = Trie()
         self.trie.load_from_file("word_data.txt")
    
+    def search_word(self):
+        search_query = self.search_text.get()
+        search_result = self.trie.search(search_query)
+        if search_result:
+            self.search_result_label.config(text=f"검색한 단어: {search_query}, 횟수: {search_result.count}, 점수: {search_result.score:.2f}")
+        else:
+            self.search_result_label.config(text="검색 결과 없음")
+    
     def open_word_data_file(self):
         # 파일 경로
         filepath = "word_data.txt"
