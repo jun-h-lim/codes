@@ -35,6 +35,16 @@ class Trie:
             node = node.children[char]
         return node if node.is_end_of_word else None
 
+    '''def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return None
+            node = node.children[char]
+        if node is not None and node.is_end_of_word:
+            return node
+        return None'''
+    
     def save_to_file(self, file_path):
         with open(file_path, "w") as file:
             self._save_node(self.root, "", file)
@@ -53,17 +63,7 @@ class Trie:
                     self.insert_existing(word, int(count), float(score))
         except FileNotFoundError:
             print(f"{file_path} 파일이 존재하지 않습니다. 새로운 파일을 생성합니다.")
-
-    def search(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                return None
-            node = node.children[char]
-        if node is not None and node.is_end_of_word:
-            return node
-        return None
-    
+  
     def insert_existing(self, word, count, score):
         node = self.root
         for char in word:
@@ -100,6 +100,19 @@ def preprocess_text(text):
 # 문장을 단어 단위로 분리
 def split_sentence(sentence):
     return preprocess_text(sentence).split()
+
+def find_best_match(input_words, recognized_words):
+    best_matches = []
+    for input_word in input_words:
+        best_match = None
+        min_distance = float('inf')
+        for recognized_word in recognized_words:
+            distance = levenshtein_distance(input_word, recognized_word)
+            if distance < min_distance:
+                min_distance = distance
+                best_match = recognized_word
+        best_matches.append((input_word, best_match, min_distance))
+    return best_matches
 
 # 음성 인식 함수
 class VoiceApp:
@@ -204,19 +217,6 @@ class VoiceApp:
         # 변경된 Trie 데이터를 파일에 저장
         self.trie.save_to_file("word_data.txt")
     
-def find_best_match(input_words, recognized_words):
-    best_matches = []
-    for input_word in input_words:
-        best_match = None
-        min_distance = float('inf')
-        for recognized_word in recognized_words:
-            distance = levenshtein_distance(input_word, recognized_word)
-            if distance < min_distance:
-                min_distance = distance
-                best_match = recognized_word
-        best_matches.append((input_word, best_match, min_distance))
-    return best_matches
-
 root = tk.Tk()
 app = VoiceApp(root)
 root.mainloop()
